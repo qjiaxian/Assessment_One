@@ -486,39 +486,157 @@ FAIL=0
 
 因此 M0-1 开发环境验收通过。
 
-## 7. 当前完成情况
+## 7.上传文件到GitHub
+
+### 7.1 创建 GitHub 远程仓库
+
+在 GitHub 创建个人仓库：
+https://github.com/qjiaxian/Assessment_One
+
+本地项目目录：
+~/Assessment_One
+
+### 7.2 添加远程仓库
+
+在本地仓库中执行：
+git remote add origin https://github.com/qjiaxian/Assessment_One.git
+
+检查远程仓库：
+git remote -v
+
+确认：
+origin  https://github.com/qjiaxian/Assessment_One.git (fetch)
+origin  https://github.com/qjiaxian/Assessment_One.git (push)
+
+### 7.3 配置 GitHub 网络代理
+
+由于 Ubuntu 虚拟机无法直接访问 GitHub，本机使用 Windows 主机上的 Clash Verge 代理。
+Windows VMware VMnet8 地址：
+192.168.184.1
+
+Clash Verge 代理端口：
+7897
+
+Git 配置代理：
+git config --global http.proxy http://192.168.184.1:7897
+
+检查：
+git config --global --get http.proxy
+
+### 7.4 推送到 GitHub
+
+执行：
+git push -u origin main
+
+GitHub HTTPS 认证时：
+Username：GitHub 用户名
+Password：GitHub Fine-grained Personal Access Token
+
+注意：GitHub 已不支持使用普通账户密码进行 Git HTTPS 操作。
+
+本次推送成功：
+To https://github.com/qjiaxian/Assessment_One.git
+ * [new branch]      main -> main
+分支 'main' 设置为跟踪来自 'origin/main' 的远程分支 'main'。
+
+### 7.5 检查本地与 GitHub 是否同步
+
+执行：
+git status
+
+最终结果：
+位于分支 main
+您的分支与上游分支 'origin/main' 一致。
+无文件要提交，干净的工作区
+
+### 7.6 本机踩坑实录
+
+#### 7.6.1 Ubuntu 无法直接访问 GitHub
+
+原始报错：
+执行：
+git push -u origin main
+出现：
+Failed to connect to github.com port 443
+使用 curl 测试：
+curl -I https://github.com
+同样无法连接。
+
+排查过程：
+Windows 主机使用 Clash Verge，代理端口为：
+7897
+开始时 Clash 只监听：
+127.0.0.1:7897
+Ubuntu 虚拟机无法直接访问 Windows 的 localhost 代理。
+在 Clash Verge 中开启：
+局域网连接
+然后确认 VMware VMnet8 地址：
+192.168.184.1
+Ubuntu 使用：
+curl -I -x http://192.168.184.1:7897 https://github.com
+最终得到：
+HTTP/2 200
+server: github.com
+说明代理连接恢复正常。
+Git 代理配置
+git config --global http.proxy http://192.168.184.1:7897
+随后 Git 可以正常访问 GitHub。
+
+#### 7.6.2 GitHub HTTPS 认证失败
+
+第一次执行：
+git push -u origin main
+使用 GitHub 登录密码进行认证，出现：
+Password authentication is not supported for Git operations.
+原因：
+GitHub 的 HTTPS Git 操作不再使用普通账户密码进行认证。
+解决方法：
+创建 GitHub Fine-grained Personal Access Token，并限制：
+Repository access：Only select repositories
+Repository：qjiaxian/Assessment_One
+Contents：Read and write
+Metadata：Read-only
+使用 Token 代替 GitHub 登录密码完成认证。
+
+最终成功：
+[new branch] main -> main
+
+## 8. 当前完成情况
 
 截至目前，M0-1 已完成以下内容：
 
-Ubuntu 22.04.5 LTS 环境
-VMware 虚拟机环境
-ROS 2 Humble
-Python 3.10.12
-pip 26.2.1（虚拟环境）
-uv 0.12.19
-Python 虚拟环境
-GCC 11.4.0
-G++ 11.4.0
-Make 4.3
-CMake 3.22.1
-VS Code 1.139.1
-Python、C/C++、Remote - SSH 等相关插件
-Git 2.34.1
-Git 用户名和邮箱配置
-本地 Git 仓库
-Assessment_One/M0/M0-1/README.md
-SSH 客户端安装与检查
-scp 工具安装与检查
-rsync 工具安装与检查
-SSH Key 生成
-SSH 基本登录命令学习
-scp 文件传输命令学习
-rsync 文件同步命令学习
-SSH Key 免密登录方法学习
-M0-1 环境验收
+- [x] Ubuntu 22.04.5 LTS 开发环境搭建
+- [x] ROS 2 Humble 安装与配置
+- [x] Python 3.10 环境配置
+- [x] Python 虚拟环境 `.venv` 创建
+- [x] uv 安装与使用
+- [x] gcc / g++ / make / cmake 安装与检查
+- [x] VS Code 安装及 Python、C/C++、Remote-SSH 等插件配置
+- [x] Git 安装及用户名、邮箱配置
+- [x] Git 本地仓库创建
+- [x] `M0/M0-1/README.md` 创建与编写
+- [x] Git 分阶段提交，已完成多次 commit
+- [x] GitHub 个人仓库 `Assessment_One` 创建
+- [x] 本地仓库连接 GitHub 远程仓库
+- [x] GitHub 网络代理配置
+- [x] GitHub Fine-grained Personal Access Token 配置
+- [x] 项目成功推送至 GitHub
+- [x] 本地 `main` 分支与 GitHub `origin/main` 同步
+- [x] SSH、scp、rsync 工具安装与检查
+- [x] SSH Ed25519 密钥生成
+- [x] M0-1 环境检查
 
 当前验收结果：
 
 PASS=29
 FAIL=0
 WARN=3
+
+## 9. 尚未完成
+使用实际开发板或服务器进行 SSH 远程登录验证
+ 使用实际设备验证 scp 文件传输
+ 使用实际设备验证 rsync 文件同步
+ 使用实际设备验证 SSH Key 免密登录
+ 根据实际远程操作结果继续补充 README
+ 完成 M0-2、M0-3、M0-4 等后续任务
+ 
